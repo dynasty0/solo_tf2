@@ -1,0 +1,114 @@
+{
+    "model": {
+        "type": "SOLO",
+        "backbone": {
+            "type": "MobileNetV2",
+            "input_shape": [
+                512,
+                512,
+                3
+            ]
+        },
+        "neck": {
+            "type": "FPN",
+            "in_channels": [
+                256,
+                512,
+                1024,
+                2048
+            ],
+            "out_channels": 256,
+            "start_level": 0,
+            "num_outs": 5
+        },
+        "head": {
+            "type": "DecoupledHead",
+            "num_classes": 34,
+            "in_channels": 256,
+            "stacked_convs": 7,
+            "seg_feat_channels": 256,
+            "strides": [
+                8,
+                8,
+                16,
+                32,
+                32
+            ],
+            "scale_ranges": [
+                [
+                    1,
+                    96
+                ],
+                [
+                    48,
+                    192
+                ],
+                [
+                    96,
+                    384
+                ],
+                [
+                    192,
+                    768
+                ],
+                [
+                    384,
+                    2048
+                ]
+            ],
+            "sigma": 0.2,
+            "num_grids": [
+                40,
+                36,
+                24,
+                16,
+                12
+            ],
+            "cate_down_pos": 0,
+            "with_deform": false,
+            "loss_ins": {
+                "type": "DiceLoss",
+                "use_sigmoid": true,
+                "loss_weight": 3.0
+            },
+            "loss_cate": {
+                "type": "FocalLoss",
+                "use_sigmoid": true,
+                "gamma": 2.0,
+                "alpha": 0.25,
+                "loss_weight": 1.0
+            }
+        }
+    },
+    "dataset": {
+        "type": "FutureDataset",
+        "data_path": "/data/work_ubuntu/3d-future/train/devkit",
+        "data_shape": 512,
+        "batch_size": 4,
+        "epoch_train": 12,
+        "num_train": 10000,
+        "num_val": 2144
+    },
+    "train": {
+        "base_learning_rate": 0.001,
+        "decay_epoches": [
+            8,
+            11
+        ],
+        "loss_step": 100,
+        "save_step": 1000,
+        "test_step": 10000,
+        "ckpt_path": "./saved_models/future/checkpoints",
+        "best_model_path": "./saved_models/future/best_model",
+        "saved_path": "./saved_models/future/model_0"
+    },
+    "test_cfg": {
+        "nms_pre": 500,
+        "score_thr": 0.1,
+        "mask_thr": 0.5,
+        "update_thr": 0.05,
+        "kernel": "gaussian",
+        "sigma": 2.0,
+        "max_per_img": 100
+    }
+}
